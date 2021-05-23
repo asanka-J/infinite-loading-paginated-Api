@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-require("dotenv").config();
-
 const User = require("./users");
 
 const mongo_url = `mongodb://${process.env.MONGO_USERNAME}:${encodeURIComponent(
@@ -23,18 +21,27 @@ db.once("open", async () => {
   if ((await User.countDocuments().exec()) > 0) return;
 
   Promise.all([
-    User.create({ name: "User 1" }),
-    User.create({ name: "User 2" }),
-    User.create({ name: "User 3" }),
-    User.create({ name: "User 4" }),
-    User.create({ name: "User 5" }),
-    User.create({ name: "User 6" }),
-    User.create({ name: "User 7" }),
-    User.create({ name: "User 8" }),
-    User.create({ name: "User 9" }),
-    User.create({ name: "User 10" }),
-    User.create({ name: "User 11" }),
-    User.create({ name: "User 12" })
+    await User.create({ name: "User 1" }),
+    await User.create({ name: "User 2" }),
+    await User.create({ name: "User 3" }),
+    await User.create({ name: "User 4" }),
+    await User.create({ name: "User 5" }),
+    await User.create({ name: "User 6" }),
+    await User.create({ name: "User 7" }),
+    await User.create({ name: "User 8" }),
+    await User.create({ name: "User 9" }),
+    await User.create({ name: "User 10" }),
+    await User.create({ name: "User 11" }),
+    await User.create({ name: "User 12" }),
+    await User.create({ name: "User 13" }),
+    await User.create({ name: "User 14" }),
+    await User.create({ name: "User 15" }),
+    await User.create({ name: "User 16" }),
+    await User.create({ name: "User 17" }),
+    await User.create({ name: "User 18" }),
+    await User.create({ name: "User 19" }),
+    await User.create({ name: "User 20" }),
+    await User.create({ name: "User 21" })
   ]).then(() => console.log("Added Users"));
 });
 
@@ -49,7 +56,7 @@ function paginatedResults(model) {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
     const document_count = await model.countDocuments().exec();
-    results.total_pages = document_count / parseInt(req.query.limit);
+    results.total_pages = Math.ceil(parseInt(document_count) / limit);
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -68,7 +75,12 @@ function paginatedResults(model) {
       };
     }
     try {
-      results.results = await model.find().limit(limit).skip(startIndex).exec();
+      results.results = await model
+        .find()
+        .sort({ createdAt: "desc" })
+        .limit(limit)
+        .skip(startIndex)
+        .exec();
       res.paginatedResults = results;
       next();
     } catch (e) {
